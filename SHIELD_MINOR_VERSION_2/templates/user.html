@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Proctoring - User Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .hidden { display: none; }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .question-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .question-card:hover {
+            border-left-color: #667eea;
+            transform: translateX(4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .option-radio:checked + .option-label {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+        .option-label {
+            transition: all 0.2s ease;
+        }
+        .option-label:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        .gradient-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        .gradient-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        .status-badge {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        .code-editor {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login/Signup Form -->
+    <div id="auth-section" class="min-h-screen flex items-center justify-center p-4">
+        <div class="glass-effect w-full max-w-md rounded-2xl shadow-2xl p-8 transform transition-all">
+            <div class="text-center mb-8">
+                <div class="inline-block p-4 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl mb-4">
+                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                    Exam Proctoring System
+                </h1>
+                <p class="text-gray-600 mt-2">Secure Online Examination Platform</p>
+            </div>
+            
+            <div id="auth-tabs" class="flex mb-6 bg-gray-100 rounded-lg p-1">
+                <button id="login-tab" class="flex-1 py-2 px-4 font-semibold rounded-lg bg-white shadow-sm text-purple-600 transition-all">
+                    Login
+                </button>
+                <button id="signup-tab" class="flex-1 py-2 px-4 font-semibold text-gray-600 hover:text-purple-600 transition-all">
+                    Sign Up
+                </button>
+            </div>
+            
+            <div id="login-form">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                        <input type="text" id="login-username" placeholder="Enter your username" 
+                            class="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="login-password" placeholder="Enter your password" 
+                            class="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                    </div>
+                    <button onclick="handleLogin()" 
+                        class="w-full gradient-button text-white py-3 rounded-xl font-semibold shadow-lg">
+                        Sign In
+                    </button>
+                </div>
+            </div>
+            
+            <div id="signup-form" class="hidden">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                        <input type="text" id="signup-username" placeholder="Choose a username" 
+                            class="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="signup-password" placeholder="Create a password" 
+                            class="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                    </div>
+                    <button onclick="handleSignup()" 
+                        class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all hover:transform hover:-translate-y-1">
+                        Create Account
+                    </button>
+                </div>
+            </div>
+            
+            <div id="auth-message" class="mt-4 text-center text-sm font-medium"></div>
+        </div>
+    </div>
+
+    <!-- Test Interface -->
+    <div id="test-section" class="hidden min-h-screen p-4 md:p-8">
+        <div class="max-w-5xl mx-auto">
+            <!-- Header Card -->
+            <div class="glass-effect rounded-2xl shadow-2xl p-6 mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                    <div>
+                        <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                            Sample Examination
+                        </h2>
+                        <p class="text-gray-600 mt-1">Complete all questions within the time limit</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="bg-purple-100 px-4 py-2 rounded-lg">
+                            <span class="text-xs text-gray-600">Session ID</span>
+                            <div class="text-sm font-mono font-semibold text-purple-700" id="session-id-display">-</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="test-status" class="mb-4 p-4 rounded-xl border-2 border-yellow-300 bg-gradient-to-r from-yellow-50 to-amber-50">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="font-semibold text-yellow-800">Status:</span>
+                        <span id="status-text" class="font-medium text-yellow-700">Ready to start</span>
+                    </div>
+                </div>
+                
+                <button id="start-test-btn" onclick="startTest()" 
+                    class="w-full gradient-button text-white py-4 rounded-xl font-semibold text-lg shadow-lg">
+                    <span class="flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Start Examination
+                    </span>
+                </button>
+            </div>
+
+            <!-- Test Content -->
+            <div id="test-content" class="hidden space-y-6">
+                <!-- Question 1 -->
+                <div class="question-container question-card glass-effect rounded-2xl p-6 shadow-lg" data-question="1" data-type="mcq">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                            1
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Multiple Choice Question</h3>
+                            <p class="text-gray-700 text-lg">What is the capital of France?</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3 ml-13">
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q1" value="A" class="option-radio hidden" onchange="trackQuestionAnswer(1, 'A')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">A)</span> London
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q1" value="B" class="option-radio hidden" onchange="trackQuestionAnswer(1, 'B')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">B)</span> Paris
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q1" value="C" class="option-radio hidden" onchange="trackQuestionAnswer(1, 'C')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">C)</span> Berlin
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q1" value="D" class="option-radio hidden" onchange="trackQuestionAnswer(1, 'D')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">D)</span> Madrid
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="question-container question-card glass-effect rounded-2xl p-6 shadow-lg" data-question="2" data-type="mcq">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                            2
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Multiple Choice Question</h3>
+                            <p class="text-gray-700 text-lg">Which programming language is known as the 'language of the web'?</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3 ml-13">
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q2" value="A" class="option-radio hidden" onchange="trackQuestionAnswer(2, 'A')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">A)</span> Python
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q2" value="B" class="option-radio hidden" onchange="trackQuestionAnswer(2, 'B')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">B)</span> JavaScript
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q2" value="C" class="option-radio hidden" onchange="trackQuestionAnswer(2, 'C')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">C)</span> Java
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q2" value="D" class="option-radio hidden" onchange="trackQuestionAnswer(2, 'D')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">D)</span> C++
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 3 -->
+                <div class="question-container question-card glass-effect rounded-2xl p-6 shadow-lg" data-question="3" data-type="mcq">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                            3
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Multiple Choice Question</h3>
+                            <p class="text-gray-700 text-lg">What does SQL stand for?</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3 ml-13">
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q3" value="A" class="option-radio hidden" onchange="trackQuestionAnswer(3, 'A')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">A)</span> Structured Query Language
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q3" value="B" class="option-radio hidden" onchange="trackQuestionAnswer(3, 'B')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">B)</span> Simple Query Language
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q3" value="C" class="option-radio hidden" onchange="trackQuestionAnswer(3, 'C')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">C)</span> Standard Query Language
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q3" value="D" class="option-radio hidden" onchange="trackQuestionAnswer(3, 'D')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">D)</span> Sequential Query Language
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 4 -->
+                <div class="question-container question-card glass-effect rounded-2xl p-6 shadow-lg" data-question="4" data-type="mcq">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                            4
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Multiple Choice Question</h3>
+                            <p class="text-gray-700 text-lg">Which HTTP method is used to retrieve data from a server?</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3 ml-13">
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q4" value="A" class="option-radio hidden" onchange="trackQuestionAnswer(4, 'A')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">A)</span> POST
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q4" value="B" class="option-radio hidden" onchange="trackQuestionAnswer(4, 'B')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">B)</span> GET
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q4" value="C" class="option-radio hidden" onchange="trackQuestionAnswer(4, 'C')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">C)</span> PUT
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q4" value="D" class="option-radio hidden" onchange="trackQuestionAnswer(4, 'D')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">D)</span> DELETE
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 5 -->
+                <div class="question-container question-card glass-effect rounded-2xl p-6 shadow-lg" data-question="5" data-type="mcq">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                            5
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Multiple Choice Question</h3>
+                            <p class="text-gray-700 text-lg">What is the time complexity of binary search?</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3 ml-13">
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q5" value="A" class="option-radio hidden" onchange="trackQuestionAnswer(5, 'A')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">A)</span> O(n)
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q5" value="B" class="option-radio hidden" onchange="trackQuestionAnswer(5, 'B')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">B)</span> O(log n)
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q5" value="C" class="option-radio hidden" onchange="trackQuestionAnswer(5, 'C')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">C)</span> O(n²)
+                            </span>
+                        </label>
+                        <label class="flex items-center cursor-pointer group">
+                            <input type="radio" name="q5" value="D" class="option-radio hidden" onchange="trackQuestionAnswer(5, 'D')">
+                            <span class="option-label flex-1 p-4 border-2 border-gray-200 rounded-xl group-hover:border-purple-300 transition-all">
+                                <span class="font-semibold text-purple-600 mr-2">D)</span> O(1)
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 6: Coding -->
+                <div class="question-container question-card glass-effect rounded-2xl p-6 shadow-lg" data-question="6" data-type="coding">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                            6
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Coding Question</h3>
+                            <p class="text-gray-700 text-lg">Write a function to calculate the factorial of a number.</p>
+                        </div>
+                    </div>
+                    <textarea id="code-answer" 
+                        class="code-editor w-full p-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all" 
+                        rows="12" 
+                        placeholder="Write your code here..."
+                        onfocus="trackQuestionView(6)"
+                        oninput="trackQuestionAnswer(6, this.value)"></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="glass-effect rounded-2xl p-6 shadow-lg">
+                    <button onclick="submitTest()" 
+                        class="w-full gradient-button text-white py-4 rounded-xl font-semibold text-lg shadow-lg">
+                        <span class="flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Submit Examination
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error-message" class="hidden mt-6 glass-effect rounded-2xl p-6 border-2 border-red-300 bg-gradient-to-r from-red-50 to-pink-50 shadow-lg">
+                <div class="flex items-center gap-3">
+                    <svg class="w-6 h-6 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    </svg>
+                    <div>
+                        <strong class="text-red-800 block mb-1">Error:</strong>
+                        <span id="error-text" class="text-red-700"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let authToken = localStorage.getItem('authToken');
+        let userId = localStorage.getItem('userId');
+        let sessionId = null;
+        let isTestActive = false;
+        let fullscreenExitCount = 0;
+        let eventQueue = [];
+        let lastMouseEventTime = 0;
+        let batchInterval = null;
+        let questionTimers = {};
+        let questionStartTimes = {};
+        let tabSwitchCount = 0;
+        let isRestoringFullscreen = false;
+        let fullscreenRestoreAlertShown = false;
+
+        // Initialize
+        if (authToken && userId) {
+            showTestSection();
+        }
+
+        // Auth tab switching
+        document.getElementById('login-tab').addEventListener('click', () => {
+            document.getElementById('login-form').classList.remove('hidden');
+            document.getElementById('signup-form').classList.add('hidden');
+            document.getElementById('login-tab').classList.add('bg-white', 'shadow-sm', 'text-purple-600');
+            document.getElementById('login-tab').classList.remove('text-gray-600');
+            document.getElementById('signup-tab').classList.remove('bg-white', 'shadow-sm', 'text-purple-600');
+            document.getElementById('signup-tab').classList.add('text-gray-600');
+        });
+
+        document.getElementById('signup-tab').addEventListener('click', () => {
+            document.getElementById('signup-form').classList.remove('hidden');
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('signup-tab').classList.add('bg-white', 'shadow-sm', 'text-purple-600');
+            document.getElementById('signup-tab').classList.remove('text-gray-600');
+            document.getElementById('login-tab').classList.remove('bg-white', 'shadow-sm', 'text-purple-600');
+            document.getElementById('login-tab').classList.add('text-gray-600');
+        });
+
+        // Authentication
+        async function handleLogin() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const messageEl = document.getElementById('auth-message');
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    authToken = data.token;
+                    userId = data.user_id;
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('userId', userId);
+                    showTestSection();
+                } else {
+                    messageEl.textContent = data.detail || 'Login failed';
+                    messageEl.className = 'mt-4 text-center text-sm font-medium text-red-600';
+                }
+            } catch (error) {
+                messageEl.textContent = 'Connection error. Please try again.';
+                messageEl.className = 'mt-4 text-center text-sm font-medium text-red-600';
+            }
+        }
+
+        async function handleSignup() {
+            const username = document.getElementById('signup-username').value;
+            const password = document.getElementById('signup-password').value;
+            const messageEl = document.getElementById('auth-message');
+
+            try {
+                const response = await fetch('/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, role: 'user' })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    authToken = data.token;
+                    userId = data.user_id;
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('userId', userId);
+                    showTestSection();
+                } else {
+                    messageEl.textContent = data.detail || 'Signup failed';
+                    messageEl.className = 'mt-4 text-center text-sm font-medium text-red-600';
+                }
+            } catch (error) {
+                messageEl.textContent = 'Connection error. Please try again.';
+                messageEl.className = 'mt-4 text-center text-sm font-medium text-red-600';
+            }
+        }
+
+        function showTestSection() {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('test-section').classList.remove('hidden');
+        }
+
+        // Test management
+        async function startTest() {
+            try {
+                if (document.documentElement.requestFullscreen) {
+                    await document.documentElement.requestFullscreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    await document.documentElement.webkitRequestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) {
+                    await document.documentElement.msRequestFullscreen();
+                }
+
+                const response = await fetch('/api/session/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ test_id: 1 })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    sessionId = data.session_id;
+                    document.getElementById('session-id-display').textContent = sessionId.substring(0, 12) + '...';
+                    isTestActive = true;
+                    fullscreenExitCount = 0;
+                    tabSwitchCount = 0;
+                    
+                    document.getElementById('start-test-btn').classList.add('hidden');
+                    document.getElementById('test-content').classList.remove('hidden');
+                    document.getElementById('status-text').textContent = 'Test in progress';
+                    document.getElementById('test-status').className = 'mb-4 p-4 rounded-xl border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 status-badge';
+                    document.getElementById('test-status').querySelector('span:last-child').textContent = 'Test in progress';
+
+                    startProctoring();
+                    setupQuestionTracking();
+                } else {
+                    alert('Failed to start test session');
+                }
+            } catch (error) {
+                alert('Error starting test: ' + error.message);
+            }
+        }
+
+        function startProctoring() {
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+            window.addEventListener('mousemove', (e) => {
+                const now = Date.now();
+                if (now - lastMouseEventTime >= 500) {
+                    queueEvent('MOUSE_MOVE', { x: e.clientX, y: e.clientY });
+                    lastMouseEventTime = now;
+                }
+            });
+
+            window.addEventListener('keydown', (e) => {
+                queueEvent('KEYSTROKE', { 
+                    key: e.key, 
+                    code: e.code,
+                    ctrlKey: e.ctrlKey,
+                    altKey: e.altKey,
+                    shiftKey: e.shiftKey
+                });
+            });
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden && isTestActive) {
+                    setTimeout(() => {
+                        if (document.hidden && isTestActive) {
+                            tabSwitchCount++;
+                            queueEvent('FOCUS_LOST', { 
+                                timestamp: new Date().toISOString(),
+                                reason: 'tab_switch',
+                                count: tabSwitchCount
+                            });
+
+                            if (tabSwitchCount >= 2) {
+                                terminateTest('You have switched tabs 2 times. Test terminated due to suspicious activity.');
+                            } else if (tabSwitchCount === 1) {
+                                alert('⚠️ WARNING: Tab switch detected!\n\nYou have switched tabs 1 time.\n\nIf you switch tabs again, the test will be automatically terminated.');
+                            }
+                        }
+                    }, 100);
+                } else if (!document.hidden && isTestActive) {
+                    setTimeout(() => {
+                        if (!isTestActive || document.hidden) return;
+                        
+                        const isFullscreen = document.fullscreenElement || 
+                                           document.webkitFullscreenElement || 
+                                           document.msFullscreenElement;
+                        
+                        if (!isFullscreen && !isRestoringFullscreen) {
+                            console.log('Tab switched back - restoring fullscreen...');
+                            reenterFullscreen();
+                        }
+                    }, 200);
+                }
+            });
+            
+            window.addEventListener('focus', () => {
+                if (isTestActive && !document.hidden && !isRestoringFullscreen) {
+                    setTimeout(() => {
+                        if (!isTestActive || document.hidden) return;
+                        
+                        const isFullscreen = document.fullscreenElement || 
+                                           document.webkitFullscreenElement || 
+                                           document.msFullscreenElement;
+                        
+                        if (!isFullscreen) {
+                            console.log('Window focused - checking fullscreen status...');
+                            reenterFullscreen();
+                        }
+                    }, 300);
+                }
+            });
+
+            window.addEventListener('blur', () => {
+                if (isTestActive && !document.hidden) {
+                    queueEvent('FOCUS_LOST', { reason: 'window_blur' });
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (isTestActive) {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Tab') {
+                        e.preventDefault();
+                        alert('⚠️ Tab switching using keyboard shortcuts is not allowed during the test!');
+                        queueEvent('FOCUS_LOST', { reason: 'keyboard_tab_switch_attempt' });
+                    }
+                    if (e.altKey && e.key === 'Tab') {
+                        queueEvent('FOCUS_LOST', { reason: 'alt_tab_attempt' });
+                    }
+                }
+            });
+
+            batchInterval = setInterval(submitBatch, 3000);
+        }
+
+        let isHandlingFullscreen = false;
+
+        function handleFullscreenChange() {
+            if (!document.fullscreenElement && 
+                !document.webkitFullscreenElement && 
+                !document.msFullscreenElement) {
+                if (!isTestActive) return;
+                if (isHandlingFullscreen) return;
+                
+                const wasTabSwitch = document.hidden;
+                
+                if (!wasTabSwitch) {
+                    isHandlingFullscreen = true;
+                    fullscreenExitCount++;
+                    queueEvent('FULLSCREEN_EXIT', { count: fullscreenExitCount });
+
+                    if (fullscreenExitCount >= 3) {
+                        terminateTest('You have exited fullscreen mode 3 times. Test terminated.');
+                        isHandlingFullscreen = false;
+                        return;
+                    }
+
+                    const remaining = 3 - fullscreenExitCount;
+                    alert(`⚠️ WARNING: You have exited fullscreen ${fullscreenExitCount} time(s).\n\nRemaining attempts: ${remaining}\n\nYou will be automatically returned to fullscreen mode.`);
+                    
+                    reenterFullscreen();
+                    isHandlingFullscreen = false;
+                }
+            } else {
+                isHandlingFullscreen = false;
+            }
+        }
+
+        function reenterFullscreen() {
+            if (!isTestActive) return;
+            if (isRestoringFullscreen) {
+                console.log('Fullscreen restoration already in progress');
+                return;
+            }
+            
+            const isFullscreen = document.fullscreenElement || 
+                               document.webkitFullscreenElement || 
+                               document.msFullscreenElement;
+            
+            if (isFullscreen) {
+                console.log('Already in fullscreen');
+                isRestoringFullscreen = false;
+                return;
+            }
+            
+            isRestoringFullscreen = true;
+            const maxAttempts = 5;
+            
+            const attemptFullscreen = (attemptNumber = 1) => {
+                if (!isTestActive) {
+                    isRestoringFullscreen = false;
+                    return;
+                }
+                
+                const currentlyFullscreen = document.fullscreenElement || 
+                                          document.webkitFullscreenElement || 
+                                          document.msFullscreenElement;
+                
+                if (currentlyFullscreen) {
+                    console.log('Fullscreen restored successfully on attempt', attemptNumber);
+                    isRestoringFullscreen = false;
+                    fullscreenRestoreAlertShown = false;
+                    return;
+                }
+                
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen()
+                        .then(() => {
+                            console.log('Fullscreen restored successfully on attempt', attemptNumber);
+                            isRestoringFullscreen = false;
+                            fullscreenRestoreAlertShown = false;
+                        })
+                        .catch((err) => {
+                            console.log(`Fullscreen request failed (attempt ${attemptNumber}), retrying...`, err);
+                            if (attemptNumber < maxAttempts) {
+                                setTimeout(() => attemptFullscreen(attemptNumber + 1), 500);
+                            } else {
+                                console.error('Failed to restore fullscreen after', maxAttempts, 'attempts');
+                                isRestoringFullscreen = false;
+                                
+                                if (!fullscreenRestoreAlertShown) {
+                                    fullscreenRestoreAlertShown = true;
+                                    const userConfirmed = confirm(
+                                        '⚠️ Warning: Could not automatically restore fullscreen mode.\n\n' +
+                                        'Please click OK and then:\n' +
+                                        '1. Press F11 to enter fullscreen, OR\n' +
+                                        '2. Right-click and select "Enter Fullscreen"\n\n' +
+                                        'Click OK to acknowledge this message.'
+                                    );
+                                    
+                                    if (userConfirmed) {
+                                        setTimeout(() => {
+                                            fullscreenRestoreAlertShown = false;
+                                        }, 1000);
+                                    }
+                                }
+                            }
+                        });
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    try {
+                        document.documentElement.webkitRequestFullscreen();
+                        console.log('Fullscreen restored (webkit)');
+                        isRestoringFullscreen = false;
+                        fullscreenRestoreAlertShown = false;
+                    } catch (err) {
+                        console.error('Webkit fullscreen failed:', err);
+                        isRestoringFullscreen = false;
+                    }
+                } else if (document.documentElement.msRequestFullscreen) {
+                    try {
+                        document.documentElement.msRequestFullscreen();
+                        console.log('Fullscreen restored (ms)');
+                        isRestoringFullscreen = false;
+                        fullscreenRestoreAlertShown = false;
+                    } catch (err) {
+                        console.error('MS fullscreen failed:', err);
+                        isRestoringFullscreen = false;
+                    }
+                } else {
+                    isRestoringFullscreen = false;
+                }
+            };
+            
+            attemptFullscreen(1);
+        }
+
+        function queueEvent(eventType, eventData) {
+            if (!isTestActive || !sessionId) return;
+
+            eventQueue.push({
+                session_id: sessionId,
+                timestamp: new Date().toISOString(),
+                event_type: eventType,
+                event_data: eventData
+            });
+        }
+
+        async function submitBatch() {
+            if (eventQueue.length === 0 || !isTestActive) return;
+
+            const eventsToSend = [...eventQueue];
+            eventQueue = [];
+
+            try {
+                const response = await fetch('/api/log', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ events: eventsToSend })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    console.log(`✓ Successfully logged ${result.count} events to database`);
+                } else {
+                    console.error('Failed to submit logs:', result);
+                    eventQueue.unshift(...eventsToSend);
+                }
+            } catch (error) {
+                console.error('Error submitting logs:', error);
+                eventQueue.unshift(...eventsToSend);
+            }
+        }
+
+        function terminateTest(message) {
+            isTestActive = false;
+            if (batchInterval) {
+                clearInterval(batchInterval);
+            }
+
+            if (eventQueue.length > 0) {
+                submitBatch();
+            }
+
+            document.getElementById('test-content').classList.add('hidden');
+            document.getElementById('error-message').classList.remove('hidden');
+            document.getElementById('error-text').textContent = message;
+            document.getElementById('status-text').textContent = 'Test Terminated';
+            document.getElementById('test-status').className = 'mb-4 p-4 rounded-xl border-2 border-red-300 bg-gradient-to-r from-red-50 to-pink-50';
+
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+
+        function trackQuestionView(questionNumber) {
+            if (!isTestActive || !sessionId) return;
+            
+            if (!questionStartTimes[questionNumber]) {
+                questionStartTimes[questionNumber] = new Date();
+                questionTimers[questionNumber] = 0;
+                
+                const questionContainer = document.querySelector(`[data-question="${questionNumber}"]`);
+                const questionType = questionContainer ? questionContainer.getAttribute('data-type') : 'unknown';
+                
+                saveQuestionResponse(questionNumber, questionType, null, true);
+            }
+        }
+
+        function trackQuestionAnswer(questionNumber, answer) {
+            if (!isTestActive || !sessionId) return;
+            
+            if (!questionStartTimes[questionNumber]) {
+                questionStartTimes[questionNumber] = new Date();
+                questionTimers[questionNumber] = 0;
+            }
+            
+            const timeSpent = Math.floor((new Date() - questionStartTimes[questionNumber]) / 1000);
+            questionTimers[questionNumber] = timeSpent;
+            
+            const questionContainer = document.querySelector(`[data-question="${questionNumber}"]`);
+            const questionType = questionContainer ? questionContainer.getAttribute('data-type') : 'mcq';
+            
+            saveQuestionResponse(questionNumber, questionType, answer, false);
+        }
+
+        async function saveQuestionResponse(questionNumber, questionType, answer, isView) {
+            if (!sessionId) return;
+            
+            try {
+                const timeTaken = questionTimers[questionNumber] || 0;
+                const firstViewed = questionStartTimes[questionNumber] || new Date();
+                
+                await fetch('/api/question/response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        question_number: questionNumber,
+                        question_type: questionType,
+                        answer: answer,
+                        time_taken_seconds: timeTaken,
+                        first_viewed_at: firstViewed.toISOString()
+                    })
+                });
+            } catch (error) {
+                console.error('Error saving question response:', error);
+            }
+        }
+
+        function setupQuestionTracking() {
+            const questionContainers = document.querySelectorAll('.question-container');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && isTestActive) {
+                        const questionNumber = parseInt(entry.target.getAttribute('data-question'));
+                        trackQuestionView(questionNumber);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            questionContainers.forEach(container => {
+                observer.observe(container);
+            });
+        }
+
+        async function submitTest() {
+            if (!isTestActive) return;
+
+            try {
+                for (let qNum in questionTimers) {
+                    const questionContainer = document.querySelector(`[data-question="${qNum}"]`);
+                    const questionType = questionContainer ? questionContainer.getAttribute('data-type') : 'mcq';
+                    
+                    let answer = null;
+                    if (questionType === 'mcq') {
+                        const selected = document.querySelector(`input[name="q${qNum}"]:checked`);
+                        answer = selected ? selected.value : null;
+                    } else if (questionType === 'coding') {
+                        answer = document.getElementById('code-answer')?.value || null;
+                    }
+                    
+                    if (questionStartTimes[qNum]) {
+                        await saveQuestionResponse(parseInt(qNum), questionType, answer, false);
+                    }
+                }
+
+                await fetch('/api/session/end', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ session_id: sessionId })
+                });
+
+                if (eventQueue.length > 0) {
+                    await submitBatch();
+                }
+
+                isTestActive = false;
+                if (batchInterval) {
+                    clearInterval(batchInterval);
+                }
+
+                alert('Test submitted successfully!');
+                document.getElementById('status-text').textContent = 'Test Completed';
+                document.getElementById('test-status').className = 'mb-4 p-4 rounded-xl border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50';
+            } catch (error) {
+                alert('Error submitting test: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
